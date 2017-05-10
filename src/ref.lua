@@ -11,7 +11,7 @@ ffi = require 'ffi'
 torch.setdefaulttensortype('torch.FloatTensor')
 
 -- Project directory
-projectDir = paths.concat(os.getenv('HOME'),'pose-hg-train')
+projectDir = '/home/local/yhasson/baselines/tzionas/pose-hg-train'
 
 -- Process command line arguments, load helper functions
 paths.dofile('opts.lua')
