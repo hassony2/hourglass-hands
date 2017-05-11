@@ -85,10 +85,19 @@ function Dataset:loadImage(idx)
     return image.load(self:getPath(idx))
 end
 
-function Dataset:getPartInfo(idx)
+function Dataset:getPartInfo(idx, verbose)
+    verbose = verbose or true
     local pts = self.annot.part[idx]:clone()
     local c = self.annot.center[idx]:clone()
     local s = self.annot.scale[idx]
+    if verbose then
+	print("pts")
+        print(pts)
+	print("center")
+	print(c)
+	print("scale")
+	print(s)
+    end
     -- Small adjustment so cropping is less likely to take feet out
     c[2] = c[2] + 15 * s
     s = s * 1.25
