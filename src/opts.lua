@@ -9,7 +9,7 @@ local function parse(arg)
     cmd:text()
     cmd:option('-expID',       'default', 'Experiment ID')
     cmd:option('-dataset',        'tzionas', 'Dataset choice: mpii | flic')
-    cmd:option('-dataDir',  projectDir .. '/home/local/yhasson/datasets/tzionas', 'Data directory')
+    cmd:option('-dataDir',  '/home/local/yhasson/datasets/tzionas/15/1', 'Data directory')
     cmd:option('-expDir',   projectDir .. '/exp',  'Experiments directory')
     cmd:option('-manualSeed',         -1, 'Manually set RNG seed')
     cmd:option('-GPU',                 1, 'Default preferred GPU, if set to -1: no GPU')
@@ -65,7 +65,7 @@ local function parse(arg)
 
     local opt = cmd:parse(arg or {})
     opt.expDir = paths.concat(opt.expDir, opt.dataset)
-    opt.dataDir = paths.concat(opt.dataDir, opt.dataset)
+    print(opt.dataDir)
     opt.save = paths.concat(opt.expDir, opt.expID)
     return opt
 end

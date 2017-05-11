@@ -11,15 +11,19 @@ end
 
 function Dataset:__init()
     self.annotationDir = 'joints_2D_GT'
-    self.nJoints = 14 
-    self.accIdxs = {1,2,3,4,5,6,7,8,9,10,11,12,13}
-    -- self.flipRef = {{1,6},   {2,5},   {3,4},
-    --                {11,16}, {12,15}, {13,14}}
+    self.nJoints = 28
+	self.accIdx = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+				  15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28}
+    self.flipRef = {{1, 15},   {2,16},   {3,17},
+                    {4,18}, {5,19}, {6,20},
+					{7, 21}, {8,22}, {9,23},
+					{10,24}, {11,25} ,{12,26},
+					{13,27}, {14,28}}
     -- Pairs of joints for drawing skeleton
     self.skeletonRef = {{1,2,1},    {2,3,1},
                         {4,5,2},    {5,6,2},
                         {7,8,0},    {8,9,0},
-                        {10,11,3},   {11,12,3}
+                        {10,11,3},  {11,12,3},
                         {13,14,4}}
 	self.testFrac = 0.2
 	self.valFrac = 0.2
@@ -50,7 +54,7 @@ function Dataset:size(set)
 end
 
 function Dataset:getPath(idx)
-    return paths.concat(opt.dataDir, idx .. '.png' )
+    return paths.concat(opt.dataDir, 'rgb/' .. string.format("%03d", idx) .. '.png' )
 end
 
 function Dataset:loadImage(idx)
@@ -60,12 +64,12 @@ end
 function Dataset:getPartInfo(idx, verbose)
 	-- retrieve joint localizations
 	verbose = verbose or true
-    local annotationPath = path.concat(opt.dataDir, self.annotationDir)
-	local fileName = path.concat(annotationPath, idx .. '.txt')
+    local annotationPath = paths.concat(opt.dataDir, self.annotationDir)
+	local fileName = paths.concat(annotationPath, string.format("%03d", idx) .. '.txt')
     local file = io.open(fileName)
-    local pts = torch.zeros(14, 2)
+    local pts = torch.zeros(self.nJoints, 2)
     if file then
-		if verbose then:
+		if verbose then
         	print('got file!')
 		end
         for line in file:lines() do
@@ -83,7 +87,7 @@ function Dataset:getPartInfo(idx, verbose)
 
     -- center of hand is considered as center of image
     local c = torch.Tensor({320, 240})
-    local s = 1
+    local s = 2
     return pts, c, s
 end
 
