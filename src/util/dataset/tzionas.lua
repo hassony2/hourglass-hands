@@ -1,69 +1,41 @@
 local M = {}
 Dataset = torch.class('pose.Dataset',M)
 
+function randomSplit(list, fraction)
+	local mixedlist = torch.randperm(list:size(1))
+	local splitIdx = math.floor(list:numel()*fraction)
+	local firstSplit = mixedlist[{{1, splitIdx}}]
+	local secondSplit = mixedlist[{{splitIdx + 1, -1}}]
+	return firstSplit, secondSplit
+end
+
 function Dataset:__init()
-    self.nJoints = 13 
-    self.accIdxs = {0,2,3,4,5,6,7,8,9,10,11,12}
+    self.annotationDir = 'joints_2D_GT'
+    self.nJoints = 14 
+    self.accIdxs = {1,2,3,4,5,6,7,8,9,10,11,12,13}
     -- self.flipRef = {{1,6},   {2,5},   {3,4},
     --                {11,16}, {12,15}, {13,14}}
     -- Pairs of joints for drawing skeleton
-    self.skeletonRef = {{0,1,1},    {1,2,1},
-                        {3,4,2},    {4,5,2},
-                        {6,7,0},    {7,8,0},
-                        {9,10,3},   {10,11,3}
-                        {12,13,4}}
-
-    local annot = {}
-    local tags = {'index','person','imgname','part','center','scale',
-                  'normalize','torsoangle','visible','multi','istrain'}
-    local a = hdf5.open(paths.concat(projectDir,'data/mpii/annot.h5'),'r')
-    for _,tag in ipairs(tags) do annot[tag] = a:read(tag):all() end
-    a:close()
-    annot.index:add(1)
-    annot.person:add(1)
-    annot.part:add(1)
+    self.skeletonRef = {{1,2,1},    {2,3,1},
+                        {4,5,2},    {5,6,2},
+                        {7,8,0},    {8,9,0},
+                        {10,11,3},   {11,12,3}
+                        {13,14,4}}
+	self.testFrac = 0.2
+	self.valFrac = 0.2
 
     -- Index reference
     if not opt.idxRef then
-        local allIdxs = torch.range(1,annot.index:size(1))
-        opt.idxRef = {}
-        opt.idxRef.test = allIdxs[annot.istrain:eq(0)]
-        opt.idxRef.train = allIdxs[annot.istrain:eq(1)]
+        local allIdxs = torch.range(1, 205, 5)
+    	opt.idxRef = {}
+        opt.idxRef.test, opt.idxRef.train = randomSplit(allIdxs, self.testFrac)
 
-        if not opt.randomValid then
-            -- Use same validation set as used in our paper (and same as Tompson et al)
-            tmpAnnot = annot.index:cat(annot.person, 2):long()
-            tmpAnnot:add(-1)
-
-            local validAnnot = hdf5.open(paths.concat(projectDir, 'data/mpii/annot/valid.h5'),'r')
-            local tmpValid = validAnnot:read('index'):all():cat(validAnnot:read('person'):all(),2):long()
-            opt.idxRef.valid = torch.zeros(tmpValid:size(1))
-            opt.nValidImgs = opt.idxRef.valid:size(1)
-            opt.idxRef.train = torch.zeros(opt.idxRef.train:size(1) - opt.nValidImgs)
-
-            -- Loop through to get proper index values
-            local validCount = 1
-            local trainCount = 1
-            for i = 1,annot.index:size(1) do
-                if validCount <= tmpValid:size(1) and tmpAnnot[i]:equal(tmpValid[validCount]) then
-                    opt.idxRef.valid[validCount] = i
-                    validCount = validCount + 1
-                elseif annot.istrain[i] == 1 then
-                    opt.idxRef.train[trainCount] = i
-                    trainCount = trainCount + 1
-                end
-            end
-        else
-            -- Set up random training/validation split
-            local perm = torch.randperm(opt.idxRef.train:size(1)):long()
-            opt.idxRef.valid = opt.idxRef.train:index(1, perm:sub(1,opt.nValidImgs))
-            opt.idxRef.train = opt.idxRef.train:index(1, perm:sub(opt.nValidImgs+1,-1))
-        end
+        -- Set up random training/validation split
+        opt.idxRef.valid, opt.idxRef.train = randomSplit(opt.idxRef.train, self.valFrac)
 
         torch.save(opt.save .. '/options.t7', opt)
     end
 
-    self.annot = annot
     self.nsamples = {train=opt.idxRef.train:numel(),
                      valid=opt.idxRef.valid:numel(),
                      test=opt.idxRef.test:numel()}
@@ -78,25 +50,46 @@ function Dataset:size(set)
 end
 
 function Dataset:getPath(idx)
-    return paths.concat(opt.dataDir,'images',ffi.string(self.annot.imgname[idx]:char():data()))
+    return paths.concat(opt.dataDir, idx .. '.png' )
 end
 
 function Dataset:loadImage(idx)
     return image.load(self:getPath(idx))
 end
 
-function Dataset:getPartInfo(idx)
-    local pts = self.annot.part[idx]:clone()
-    local c = self.annot.center[idx]:clone()
-    local s = self.annot.scale[idx]
-    -- Small adjustment so cropping is less likely to take feet out
-    c[2] = c[2] + 15 * s
-    s = s * 1.25
+function Dataset:getPartInfo(idx, verbose)
+	-- retrieve joint localizations
+	verbose = verbose or true
+    local annotationPath = path.concat(opt.dataDir, self.annotationDir)
+	local fileName = path.concat(annotationPath, idx .. '.txt')
+    local file = io.open(fileName)
+    local pts = torch.zeros(14, 2)
+    if file then
+		if verbose then:
+        	print('got file!')
+		end
+        for line in file:lines() do
+            local idx, x, y = unpack(line:split("\t")) 
+            idx = idx + 1 -- from 0 to 1 indexing
+            pts[idx][1] = x
+            pts[idx][2] = y
+        end
+    else
+		if verbose then
+        	print('file not found')
+		end
+    end
+    pts:add(1)
+
+    -- center of hand is considered as center of image
+    local c = torch.Tensor({320, 240})
+    local s = 1
     return pts, c, s
 end
 
 function Dataset:normalize(idx)
-    return self.annot.normalize[idx]
+    -- Used to account for image size variation in PCK measurement
+    return 100
 end
 
 return M.Dataset
