@@ -2,12 +2,18 @@ local M = {}
 Dataset = torch.class('pose.Dataset',M)
 
 function randomSplit(list, fraction)
-	local mixedlist = torch.randperm(list:size(1))
-	local splitIdx = math.floor(list:numel()*fraction)
-	local firstSplit = mixedlist[{{1, splitIdx}}]
-	local secondSplit = mixedlist[{{splitIdx + 1, -1}}]
-	return firstSplit, secondSplit
-end
+	---- splits list into two random portions
+	---- the first one containing fraction of the initial values
+	---- and the second one 1 - fraction
+    local mixedIdx = torch.randperm(list:size(1))
+    local splitIdx = math.floor(list:numel()*fraction)
+    local firstIdx = mixedIdx[{{1, splitIdx}}]
+    local firstSplit = list:index(1, firstIdx:long())
+    local secondIdx = mixedIdx[{{splitIdx + 1, -1}}]
+    local secondSplit = list:index(1, secondIdx:long())
+    return firstSplit, secondSplit
+ end
+
 
 function Dataset:__init()
     self.annotationDir = 'joints_2D_GT'
@@ -30,13 +36,14 @@ function Dataset:__init()
 
     -- Index reference
     if not opt.idxRef then
-        local allIdxs = torch.range(1, 205, 5)
+        local allIdxs = torch.range(0, 205, 5)
+
     	opt.idxRef = {}
         opt.idxRef.test, opt.idxRef.train = randomSplit(allIdxs, self.testFrac)
+		
 
         -- Set up random training/validation split
         opt.idxRef.valid, opt.idxRef.train = randomSplit(opt.idxRef.train, self.valFrac)
-
         torch.save(opt.save .. '/options.t7', opt)
     end
 
@@ -63,7 +70,7 @@ end
 
 function Dataset:getPartInfo(idx, verbose)
 	-- retrieve joint localizations
-	verbose = verbose or true
+	verbose = verbose or false
     local annotationPath = paths.concat(opt.dataDir, self.annotationDir)
 	local fileName = paths.concat(annotationPath, string.format("%03d", idx) .. '.txt')
     local file = io.open(fileName)
@@ -80,7 +87,7 @@ function Dataset:getPartInfo(idx, verbose)
         end
     else
 		if verbose then
-        	print('file not found')
+        	print('file '.. fileName .. ' not found')
 		end
     end
     pts:add(1)
