@@ -1,3 +1,10 @@
+# Proof of concept
+
+[prediction visualization on dummy dataset](src/itorch/hand-demo.ipynb)
+
+
+
+
 # Stacked Hourglass Networks for Human Pose Estimation (Training Code)
 
 This is the training pipeline used for:
