@@ -5,7 +5,9 @@
 
 
 
-# Stacked Hourglass Networks for Human Pose Estimation (Training Code)
+# This code is based on : [Stacked Hourglass Networks for Human Pose Estimation (Training Code)](https://github.com/anewell/pose-hg-train/)
+
+*Readme from original paper : *
 
 This is the training pipeline used for:
 
