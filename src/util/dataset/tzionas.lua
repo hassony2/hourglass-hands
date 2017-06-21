@@ -27,7 +27,6 @@ function Dataset:__init()
                          13, 14, 15, 16, 18, 19}
 	self.testFolders = {2, 12, 17}
 	self.valFolders = {4, 11, 20}
-	self.valFolders = {4}
     self.annotationDir = 'joints_2D_GT'
     self.nJoints = 28
 	self.accIdx = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
