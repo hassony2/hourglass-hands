@@ -3,4 +3,6 @@
 *.pyc
 exp/
 data/**/images
+data/
 src/models/old
+src/itorch/.ipynb_checkpoints/*
