@@ -1,6 +1,8 @@
 *.t7
 *~
 *.pyc
+*.swp
+*.swo
 exp/
 data/**/images
 data/
