@@ -1,6 +1,6 @@
 if not opt then
 
-projectDir = projectDir or paths.concat(os.getenv('HOME'),'pose-hg-train')
+projectDir = projectDir or paths.concat(os.getenv('HOME'),'pose-hg-train')  
 
 local function parse(arg)
     local cmd = torch.CmdLine()
@@ -9,7 +9,7 @@ local function parse(arg)
     cmd:text()
     cmd:option('-expID',       'default', 'Experiment ID')
     cmd:option('-dataset',        'synthetic', 'Dataset choice: mpii | flic')
-    cmd:option('-dataDir',  '/home/local/yhasson/baselines/tzionas/pose-hg-train/data/synthetic/', 'Data directory')
+    cmd:option('-dataDir',  '/test/', 'Data directory')
     cmd:option('-expDir',   projectDir .. '/exp',  'Experiments directory')
     cmd:option('-manualSeed',         -1, 'Manually set RNG seed')
     cmd:option('-GPU',                 1, 'Default preferred GPU, if set to -1: no GPU')

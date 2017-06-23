@@ -11,7 +11,7 @@ ffi = require 'ffi'
 torch.setdefaulttensortype('torch.FloatTensor')
 
 -- Project directory
-projectDir = '/home/local/yhasson/baselines/tzionas/pose-hg-train'
+projectDir = '/sequoia/data1/yhasson/hourglass-hands/'
 
 -- Process command line arguments, load helper functions
 paths.dofile('opts.lua')
