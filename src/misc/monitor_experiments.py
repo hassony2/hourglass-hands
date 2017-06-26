@@ -41,16 +41,16 @@ def readlog(filepath):
 
 while True:
     logs = {}
-
-    for dirname, dirnames, filenames in os.walk('../../exp/mpii'):
+    exp_folder = '../../exp/synthetic/'
+    for dirname, dirnames, filenames in os.walk(exp_folder):
         for subdirname in dirnames:
             logs[subdirname] = {}
-            train_path = '../../exp/mpii/' + subdirname + '/train.log'
-            test_path = '../../exp/mpii/' + subdirname + '/test.log'
+            train_path = exp_folder + subdirname + '/train.log'
+            test_path = exp_folder + subdirname + '/valid.log'
             if (os.path.exists(train_path) and os.path.exists(test_path) and
                 os.stat(train_path).st_size != 0 and os.stat(test_path).st_size != 0):
+		logs[subdirname]['test'] = readlog(test_path)
                 logs[subdirname]['train'] = readlog(train_path)
-                logs[subdirname]['test'] = readlog(test_path)
                 if track_multiple and exp_to_track in subdirname:
                     if not subdirname in experiments_to_show:
                         experiments_to_show += [subdirname]
@@ -110,7 +110,7 @@ while True:
         if 'accuracy' in k and not last_str in k:
             axs[k].set_ylim(0,1)
 
-    axs['Test accuracy'].legend(loc='lower right', fontsize=10)
+    axs['Test accuracy'].legend(loc='lower right')
     print time.strftime('%X %x %Z')
     plt.show()
     plt.pause(900)
