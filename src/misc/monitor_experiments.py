@@ -9,7 +9,12 @@ import sys
 
 plt.ion()
 try:
-    experiments_to_show = sys.argv[1].split(',')
+    dataset = sys.argv[1]
+except:
+    print "Error: No dataset provided"
+    exit()
+try:
+    experiments_to_show = sys.argv[2].split(',')
 except:
     print "Error: No experiments provided"
     exit()
@@ -18,7 +23,7 @@ print "Monitoring the following experiments:",
 for exp in experiments_to_show: print exp,
 print ""
 
-track_multiple = sys.argv[2] == '1'
+track_multiple = sys.argv[3] == '1'
 if track_multiple:
     exp_to_track = experiments_to_show[0]
     print "Tracking all variations of:",exp_to_track
@@ -41,7 +46,7 @@ def readlog(filepath):
 
 while True:
     logs = {}
-    exp_folder = '../../exp/synthetic/'
+    exp_folder = '../../exp/' + dataset + '/'
     for dirname, dirnames, filenames in os.walk(exp_folder):
         for subdirname in dirnames:
             logs[subdirname] = {}
