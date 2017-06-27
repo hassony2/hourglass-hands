@@ -58,9 +58,9 @@ function step(tag, predictSet)
         else
             -- Validation: Get flipped output
             output = applyFn(function (x) return x:clone() end, output)
-            local flippedOut = model:forward(flip(input))
-            flippedOut = applyFn(function (x) return flip(shuffleLR(x)) end, flippedOut)
-            output = applyFn(function (x,y) return x:add(y):div(2) end, output, flippedOut)
+            -- local flippedOut = model:forward(flip(input))
+            -- flippedOut = applyFn(function (x) return flip(shuffleLR(x)) end, flippedOut)
+            -- output = applyFn(function (x,y) return x:add(y):div(2) end, output, flippedOut)
 
             -- Save sample
             -- Set batchsize to 1 during prediction and to option during training
