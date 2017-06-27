@@ -58,9 +58,9 @@ function step(tag, predictSet)
         else
             -- Validation: Get flipped output
             output = applyFn(function (x) return x:clone() end, output)
-            local flippedOut = model:forward(flip(input))
-            flippedOut = applyFn(function (x) return flip(shuffleLR(x)) end, flippedOut)
-            output = applyFn(function (x,y) return x:add(y):div(2) end, output, flippedOut)
+            -- local flippedOut = model:forward(flip(input))
+            -- flippedOut = applyFn(function (x) return flip(shuffleLR(x)) end, flippedOut)
+            -- output = applyFn(function (x,y) return x:add(y):div(2) end, output, flippedOut)
 
             -- Save sample
             -- Set batchsize to 1 during prediction and to option during training
@@ -76,7 +76,7 @@ function step(tag, predictSet)
             if opt.saveInput then saved.input:sub(tmpIdx, tmpIdx+bs-1):copy(input) end
             if opt.saveHeatmaps then saved.heatmaps:sub(tmpIdx, tmpIdx+bs-1):copy(tmpOut) end
             saved.idxs:sub(tmpIdx, tmpIdx+bs-1):copy(indices)
-            saved.preds:sub(tmpIdx, tmpIdx+bs-1):copy(postprocess(set,indices,output))
+            saved.preds:sub(tmpIdx, tmpIdx+bs-1):copy(postprocess(set, indices, output))
         end
 
         -- Calculate accuracy
