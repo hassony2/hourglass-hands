@@ -34,6 +34,7 @@ torch.save(paths.concat(opt.save,'final_model.t7'), model)
 -- Generate final predictions on validation set
 if opt.finalPredictions then
 	ref.log = {}
-	loader.test = Dataloader(opt, dataset, ref, 'test')
-	predict()
+    predictSet = opt.predictSet
+	loader[predictSet] = Dataloader(opt, dataset, ref, predictSet)
+	predict(predictSet)
 end

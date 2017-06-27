@@ -6,7 +6,7 @@ if opt.saveInput then saved.input = torch.Tensor(validSamples, unpack(ref.inputD
 if opt.saveHeatmaps then saved.heatmaps = torch.Tensor(validSamples, unpack(ref.outputDim[1])) end
 
 -- Main processing step
-function step(tag)
+function step(tag, predictSet)
     local avgLoss, avgAcc = 0.0, 0.0
     local output, err, idx
     local param, gradparam = model:getParameters()
@@ -19,18 +19,22 @@ function step(tag)
         model:evaluate()
         if tag == 'predict' then
             print("==> Generating predictions...")
-            local nSamples = dataset:size('test')
+            local nSamples = dataset:size(predictSet)
             saved = {idxs = torch.Tensor(nSamples),
                      preds = torch.Tensor(nSamples, unpack(ref.predDim))}
             if opt.saveInput then saved.input = torch.Tensor(nSamples, unpack(ref.inputDim)) end
             if opt.saveHeatmaps then saved.heatmaps = torch.Tensor(nSamples, unpack(ref.outputDim[1])) end
-            set = 'test'
+            set = predictSet
         else
             set = 'valid'
         end
     end
-
-    local nIters = opt[set .. 'Iters']
+    local nIters = nil
+    if tag == 'predict' then
+        nIters = dataset:size(predictSet)
+    else      
+        nIters = opt[set .. 'Iters']
+    end
     for i,sample in loader[set]:run() do
         xlua.progress(i, nIters)
         local input, label, indices = unpack(sample)
@@ -59,7 +63,13 @@ function step(tag)
             output = applyFn(function (x,y) return x:add(y):div(2) end, output, flippedOut)
 
             -- Save sample
-            local bs = opt[set .. 'Batch']
+            -- Set batchsize to 1 during prediction and to option during training
+            local bs = nil
+            if tag == 'predict' then
+                bs = 1
+            else
+                bs = opt[set .. 'Batch']
+            end
             local tmpIdx = (i-1) * bs + 1
             local tmpOut = output
             if type(tmpOut) == 'table' then tmpOut = output[#output] end
@@ -102,4 +112,4 @@ end
 
 function train() step('train') end
 function valid() step('valid') end
-function predict() step('predict') end
+function predict(predictSet) step('predict', predictSet) end
