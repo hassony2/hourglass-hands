@@ -26,9 +26,15 @@ function filesInDir(path)
 end
 
 function Dataset:__init()
-    self.rgbFolder = paths.concat(opt.dataDir, 'rgb')
+    self.useDepth = opt.useDepth
+    if self.useDepth then
+        self.depthFolder = paths.concat(opt.dataDir, 'depthpng')
+        files = filesInDir(self.depthFolder)
+    else
+        self.rgbFolder = paths.concat(opt.dataDir, 'rgb')
+        files = filesInDir(self.rgbFolder)
+    end
     self.annotFolder = paths.concat(opt.dataDir, '2Dcoord')
-    files = filesInDir(self.rgbFolder)
     self.prefixes = {}
     for i, file in ipairs(files) do
         local prefix = string.split(file, "%.")[1]
@@ -39,11 +45,11 @@ function Dataset:__init()
 				  15, 16, 17, 18, 19, 20}
     self.flipRef = {}
     -- Pairs of joints for drawing skeleton
-    self.skeletonRef = {{1,2,1},    {2,3,1},
-                        {4,5,2},    {5,6,2},
-                        {7,8,0},    {8,9,0},
-                        {10,11,3},  {11,12,3},
-                        {13,14,4}}
+    self.skeletonRef = {{1,2,1},    {2,3,1}, {3, 4, 1},
+                        {5,6,2},    {6,7,2}, {7, 8, 2},
+                        {9, 10, 3},    {10, 11, 3}, {11, 12, 3},
+                        {13,14,4}, {14, 15, 4}, {15, 16, 4},
+                        {17, 18, 5}, {18, 19, 5}, {19, 20, 5}}
     -- percentage of test samples
 	self.testFrac = 0.2
     -- percentage of validation samples among remaining samples
@@ -76,7 +82,13 @@ end
 
 function Dataset:getPath(idx)
     local prefix = self.prefixes[idx]
-    return paths.concat(self.rgbFolder, prefix .. '.png' )
+    local path = nil
+    if self.useDepth then
+        path = paths.concat(self.depthFolder, prefix .. '.png')
+    else
+        path = paths.concat(self.rgbFolder, prefix .. '.png' )
+    end
+    return path
 end
 
 function Dataset:loadImage(idx)

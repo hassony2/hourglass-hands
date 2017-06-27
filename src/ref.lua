@@ -11,7 +11,7 @@ ffi = require 'ffi'
 torch.setdefaulttensortype('torch.FloatTensor')
 
 -- Project directory
-projectDir = '/sequoia/data1/yhasson/hourglass-hands/'
+projectDir = '/home/local/yhasson/baselines/tzionas/pose-hg-train/' -- '/sequoia/data1/yhasson/hourglass-hands/'
 
 -- Process command line arguments, load helper functions
 paths.dofile('opts.lua')
@@ -33,7 +33,12 @@ end
 if not ref then
     ref = {}
     ref.nOutChannels = dataset.nJoints
-    ref.inputDim = {3, opt.inputRes, opt.inputRes}
+    local nInChannels = 3
+    if opt.useDepth then
+        nInChannels = 1
+    else
+    end
+    ref.inputDim = {nInChannels, opt.inputRes, opt.inputRes}
     ref.outputDim = {ref.nOutChannels, opt.outputRes, opt.outputRes}
 end
 
