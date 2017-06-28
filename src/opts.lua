@@ -1,6 +1,7 @@
 if not opt then
 
 projectDir = projectDir or paths.concat(os.getenv('HOME'),'pose-hg-train')  
+datasetName = datasetName
 
 local function parse(arg)
     local cmd = torch.CmdLine()
@@ -8,7 +9,7 @@ local function parse(arg)
     cmd:text(' ---------- General options ------------------------------------')
     cmd:text()
     cmd:option('-expID',       'default', 'Experiment ID')
-    cmd:option('-dataset',        'synthetic', 'Dataset choice: mpii | flic')
+    cmd:option('-dataset',        'synthetic', 'Dataset choice: mpii | flic | synthetic | uciego')
     cmd:option('-dataDir',  projectDir .. '/data/synthetic', 'Data directory')
     cmd:option('-expDir',   projectDir .. '/exp',  'Experiments directory')
     cmd:option('-manualSeed',         -1, 'Manually set RNG seed')
@@ -66,6 +67,11 @@ local function parse(arg)
     cmd:option('-hmGauss',             1, 'Heatmap gaussian size')
 
     local opt = cmd:parse(arg or {})
+    -- use global dataset if present
+    if datasetName then
+        opt.dataset = datasetName
+        opt.dataDir = projectDir .. '/data/' .. opt.dataset
+    end
     opt.expDir = paths.concat(opt.expDir, opt.dataset)
     opt.save = paths.concat(opt.expDir, opt.expID)
     return opt
