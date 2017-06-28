@@ -50,13 +50,13 @@ function Dataset:__init()
     -- Index reference
     allIdxs = torch.range(1, table.getn(self.prefixes))
     opt.idxRef = {}
-    local residualIdxs = nil
-    opt.idxRef.test, residualIdxs = datasethelper.randomSplit(allIdxs, self.testFrac)
-    opt.idxRef.valid, opt.idxRef.train = datasethelper.randomSplit(residualIdxs, self.valFrac)
+    opt.idxRef.test = allIdxs
+    opt.idxRef.valid = torch.Tensor()
+    opt.idxRef.train = torch.Tensor()
     torch.save(opt.save .. '/options.t7', opt)
 
-    self.nsamples = {train=opt.idxRef.train:numel(),
-                     valid=opt.idxRef.valid:numel(),
+    self.nsamples = {train=0,
+                     valid=0,
                      test=opt.idxRef.test:numel()}
 
     -- For final predictions
