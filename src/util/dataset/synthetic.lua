@@ -1,38 +1,16 @@
 require 'lfs'
+paths.dofile("datasethelper.lua")
 local M = {}
 Dataset = torch.class('pose.Dataset',M)
-
-function randomSplit(list, fraction)
-	---- splits list into two random portions
-	---- the first one containing fraction of the initial values
-	---- and the second one 1 - fraction
-    local mixedIdx = torch.randperm(list:size(1))
-    local splitIdx = math.floor(list:numel()*fraction)
-    local firstIdx = mixedIdx[{{1, splitIdx}}]
-    local firstSplit = list:index(1, firstIdx:long())
-    local secondIdx = mixedIdx[{{splitIdx + 1, -1}}]
-    local secondSplit = list:index(1, secondIdx:long())
-    return firstSplit, secondSplit
-end
-
-function filesInDir(path)
-    local files = {}
-    for file in lfs.dir(path) do
-        if file ~= "." and file ~= ".." then
-            table.insert(files, file)
-        end
-    end
-    return files
-end
 
 function Dataset:__init()
     self.useDepth = opt.useDepth
     if self.useDepth then
         self.depthFolder = paths.concat(opt.dataDir, 'depthpng')
-        files = filesInDir(self.depthFolder)
+        files = datasethelper.filesInDir(self.depthFolder)
     else
         self.rgbFolder = paths.concat(opt.dataDir, 'rgb')
-        files = filesInDir(self.rgbFolder)
+        files = datasethelper.filesInDir(self.rgbFolder)
     end
     self.annotFolder = paths.concat(opt.dataDir, '2Dcoord')
     self.prefixes = {}
@@ -63,8 +41,8 @@ function Dataset:__init()
     allIdxs = torch.range(1, table.getn(self.prefixes))
     opt.idxRef = {}
     local residualIdxs = nil
-    opt.idxRef.test, residualIdxs = randomSplit(allIdxs, self.testFrac)
-    opt.idxRef.valid, opt.idxRef.train = randomSplit(residualIdxs, self.valFrac)
+    opt.idxRef.test, residualIdxs = datasethelper.randomSplit(allIdxs, self.testFrac)
+    opt.idxRef.valid, opt.idxRef.train = datasethelper.randomSplit(residualIdxs, self.valFrac)
     torch.save(opt.save .. '/options.t7', opt)
 
     self.nsamples = {train=opt.idxRef.train:numel(),
