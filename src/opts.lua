@@ -1,7 +1,7 @@
 if not opt then
 
 projectDir = projectDir or paths.concat(os.getenv('HOME'),'pose-hg-train')  
-datasetName = datasetName
+datasetName = datasetName or nil --allows to pass dataset option in itorch script
 
 local function parse(arg)
     local cmd = torch.CmdLine()
@@ -70,7 +70,7 @@ local function parse(arg)
     -- use global dataset if present
     if datasetName then
         opt.dataset = datasetName
-        opt.dataDir = projectDir .. '/data/' .. opt.dataset
+        opt.dataDir = paths.concat(projectDir, 'data/'.. opt.dataset)
     end
     opt.expDir = paths.concat(opt.expDir, opt.dataset)
     opt.save = paths.concat(opt.expDir, opt.expID)
