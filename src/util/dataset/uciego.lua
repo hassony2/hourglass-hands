@@ -7,12 +7,12 @@ function Dataset:__init()
     self.dataDir =  opt.dataDir
     self.useDepth = opt.useDepth
     print('opt.dataDir : ' .. self.dataDir)
-    seq1Dir = paths.concat(self.dataDir, 'Seq1')
-    self.annotFolder = seq1Dir
-    files1 = datasethelper.filesInDir(seq1Dir)
+    local seqsDir = paths.concat(self.dataDir, 'Seqs')
+    self.annotFolder = seqsDir
+    local files = datasethelper.filesInDir(seqsDir)
     self.prefixes = {}
-    for i, file in ipairs(files1) do
-        local prefix = string.match(file, "(%a*%d+).jpg")
+    for i, file in ipairs(files) do
+        local prefix = string.match(file, "(%a*%d_%a*%d+).jpg")
         if prefix  then
             local annotPath = paths.concat(self.annotFolder, prefix .. '-1.txt')
             local annotFile = io.open(annotPath, 'r')
@@ -21,6 +21,7 @@ function Dataset:__init()
             end
         end
     end
+    print(self.prefixes)
     local synthIdx = {22, 23, 24, 25,
                           18, 19, 20, 21,
                           14, 15, 16, 17,
