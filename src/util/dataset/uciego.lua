@@ -21,7 +21,6 @@ function Dataset:__init()
             end
         end
     end
-    print(self.prefixes)
     local synthIdx = {22, 23, 24, 25,
                           18, 19, 20, 21,
                           14, 15, 16, 17,
