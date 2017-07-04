@@ -1,4 +1,6 @@
 require 'lfs'
+local cv = require 'cv'
+require 'cv.imgcodecs'
 paths.dofile("datasethelper.lua")
 local M = {}
 Dataset = torch.class('pose.Dataset',M)
@@ -6,6 +8,11 @@ Dataset = torch.class('pose.Dataset',M)
 function Dataset:__init()
     self.dataDir =  opt.dataDir
     self.useDepth = opt.useDepth
+    if self.useDepth then
+        self.depthFolder = paths.concat(opt.dataDir, 'Seqs')
+        self.loadType = cv.IMREAD_UNCHANGED
+        files = datasethelper.filesInDir(self.depthFolder)
+    end
     print('opt.dataDir : ' .. self.dataDir)
     local seqsDir = paths.concat(self.dataDir, 'Seqs')
     self.annotFolder = seqsDir
@@ -80,7 +87,15 @@ function Dataset:getPath(idx)
 end
 
 function Dataset:loadImage(idx)
-    return image.load(self:getPath(idx))
+    if self.useDepth then
+        local depthImg = cv.imread{self:getPath(idx), self.loadType}
+        depthImg = depthImg * 100
+        depthImg = nn.utils.addSingletonDimension(depthImg)
+        depthImg = depthImg:repeatTensor(3, 1, 1)
+        return depthImg:clamp(0, 1)
+    else
+        return image.load(self:getPath(idx))
+    end
 end
 
 function Dataset:getPartInfo(idx, verbose)

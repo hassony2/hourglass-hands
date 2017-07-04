@@ -1,4 +1,7 @@
 require 'lfs'
+local cv = require 'cv'
+require 'cv.imgcodecs'
+
 paths.dofile("datasethelper.lua")
 local M = {}
 Dataset = torch.class('pose.Dataset',M)
@@ -6,7 +9,8 @@ Dataset = torch.class('pose.Dataset',M)
 function Dataset:__init()
     self.useDepth = opt.useDepth
     if self.useDepth then
-        self.depthFolder = paths.concat(opt.dataDir, 'depthpng')
+        self.depthFolder = paths.concat(opt.dataDir, 'depth')
+        self.loadType = cv.IMREAD_UNCHANGED
         files = datasethelper.filesInDir(self.depthFolder)
     else
         self.rgbFolder = paths.concat(opt.dataDir, 'rgb')
@@ -62,15 +66,22 @@ function Dataset:getPath(idx)
     local prefix = self.prefixes[idx]
     local path = nil
     if self.useDepth then
-        path = paths.concat(self.depthFolder, prefix .. '.png')
+        path = paths.concat(self.depthFolder, prefix .. '.exr')
     else
-        path = paths.concat(self.rgbFolder, prefix .. '.png' )
+        path = paths.concat(self.rgbFolder, prefix .. '.png')
     end
     return path
 end
 
 function Dataset:loadImage(idx)
-    return image.load(self:getPath(idx))
+    if self.useDepth then
+        local depthImg = cv.imread{self:getPath(idx), self.loadType}
+        depthImg = depthImg:transpose(1, 3):transpose(2, 3)
+        -- depthImg = depthImg:select(3, 3) -- keep only one channel
+        return depthImg:clamp(0, 1)
+    else
+        return image.load(self:getPath(idx))
+    end
 end
 
 function Dataset:getPartInfo(idx, verbose)
