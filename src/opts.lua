@@ -68,6 +68,9 @@ local function parse(arg)
 
     local opt = cmd:parse(arg or {})
     -- use global dataset if present
+    if useDepth then
+        opt.useDepth = useDepth
+    end
     if datasetName then
         opt.dataset = datasetName
         opt.dataDir = paths.concat(projectDir, 'data/'.. opt.dataset)
