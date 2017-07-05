@@ -3,7 +3,11 @@ ref.predDim = {dataset.nJoints,5}
 ref.outputDim = {}
 criterion = nn.ParallelCriterion()
 for i = 1,opt.nStack do
-    ref.outputDim[i] = {dataset.nJoints, opt.outputRes, opt.outputRes}
+    if opt.outputSegm then
+        ref.outputDim[i] = {opt.outputRes, opt.outputRes}
+    else
+        ref.outputDim[i] = {dataset.nJoints, opt.outputRes, opt.outputRes}
+    end
     criterion:add(nn[opt.crit .. 'Criterion']())
 end
 
@@ -24,11 +28,14 @@ function generateSample(set, idx)
     end
 
     local inp = crop(img, c, s, r, opt.inputRes)
-    local out = torch.zeros(dataset.nJoints, opt.outputRes, opt.outputRes)
-    for i = 1,dataset.nJoints do
-        if pts[i][1] > 1 then -- Checks that there is a ground truth annotation
-            if opt.predictSegm then
-            else
+    local out = nil
+    if opt.outputSegm then
+        out = crop(dataset:loadSegm(idx), c, s, r, opt.inputRes)
+        out = image.scale(out, opt.outputRes, opt.outputRes)
+    else
+        out = torch.zeros(dataset.nJoints, opt.outputRes, opt.outputRes)
+        for i = 1,dataset.nJoints do
+            if pts[i][1] > 1 then -- Checks that there is a ground truth annotation
                 drawGaussian(out[i], transform(pts[i], c, s, r, opt.outputRes), opt.hmGauss)
             end
         end

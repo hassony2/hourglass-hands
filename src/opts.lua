@@ -60,6 +60,7 @@ local function parse(arg)
     cmd:text(' ---------- Data options ---------------------------------------')
     cmd:text()
     cmd:option('-useDepth',        false, 'True if use depth')
+    cmd:option('-outputSegm',      false, 'Predict segmentation as output')
     cmd:option('-inputRes',          256, 'Input image resolution')
     cmd:option('-outputRes',          64, 'Output heatmap resolution')
     cmd:option('-scale',             .25, 'Degree of scale augmentation')
@@ -67,7 +68,10 @@ local function parse(arg)
     cmd:option('-hmGauss',             1, 'Heatmap gaussian size')
 
     local opt = cmd:parse(arg or {})
-    -- use global dataset if present
+    -- use global variables if present
+    if useDepth then
+        opt.outputSegm = outputSegm
+    end
     if useDepth then
         opt.useDepth = useDepth
     end

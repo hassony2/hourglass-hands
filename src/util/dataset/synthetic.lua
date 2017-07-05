@@ -88,11 +88,12 @@ end
 function Dataset:loadSegm(idx, loadType)
     local loadType = loadType or cv.IMREAD_COLOR
     local prefix = self.prefixes[idx]
-    print(prefix)
     local path = paths.concat(self.segmFolder, prefix .. '.exr')
     local segmImg = cv.imread{path, loadType}
     segmImg = segmImg:select(3, 1)
     segmImg = segmImg:clamp(0, 1) -- CAREFULL, this implies only one mesh can be segmented !
+    -- threshold segmentation map
+    -- segmImg = segmImg:ge(0.7):float()
     return segmImg
 end
 

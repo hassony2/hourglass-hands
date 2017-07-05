@@ -1,7 +1,13 @@
 -- Prepare tensors for saving network output
 local validSamples = opt.validIters * opt.validBatch
-saved = {idxs = torch.Tensor(validSamples),
-         preds = torch.Tensor(validSamples, unpack(ref.predDim))}
+
+if opt.outputSegm then
+    saved = {idxs = torch.Tensor(validSamples)}
+else
+    saved = {idxs = torch.Tensor(validSamples),
+             preds = torch.Tensor(validSamples, unpack(ref.predDim))}
+end
+
 if opt.saveInput then saved.input = torch.Tensor(validSamples, unpack(ref.inputDim)) end
 if opt.saveHeatmaps then saved.heatmaps = torch.Tensor(validSamples, unpack(ref.outputDim[1])) end
 
@@ -38,7 +44,6 @@ function step(tag, predictSet)
     for i,sample in loader[set]:run() do
         xlua.progress(i, nIters)
         local input, label, indices = unpack(sample)
-
         if opt.GPU ~= -1 then
             -- Convert to CUDA
             input = applyFn(function (x) return x:cuda() end, input)
@@ -76,11 +81,18 @@ function step(tag, predictSet)
             if opt.saveInput then saved.input:sub(tmpIdx, tmpIdx+bs-1):copy(input) end
             if opt.saveHeatmaps then saved.heatmaps:sub(tmpIdx, tmpIdx+bs-1):copy(tmpOut) end
             saved.idxs:sub(tmpIdx, tmpIdx+bs-1):copy(indices)
-            saved.preds:sub(tmpIdx, tmpIdx+bs-1):copy(postprocess(set, indices, output))
+            if opt.outputSegm then
+            else
+                saved.preds:sub(tmpIdx, tmpIdx+bs-1):copy(postprocess(set, indices, output))
+            end
         end
 
         -- Calculate accuracy
-        avgAcc = avgAcc + accuracy(output, label) / nIters
+        if opt.outputSegm then
+            avgAcc = avgAcc + segmAccuracy(output, label) / nIters
+        else
+            avgAcc = avgAcc + accuracy(output, label) / nIters
+        end
     end
 
 

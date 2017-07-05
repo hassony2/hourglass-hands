@@ -67,7 +67,7 @@ function segmAccuracy(output, label, thr)
     local overlap = torch.cmul(predSegm, gtSegm)
 
     -- compute proportion of pixels that are overlapping
-    local overlapPixelCount = overlap:sum(3):sum(2):view(overlap:size(1))
+    local overlapPixelCount = overlap:sum(4):sum(3):sum(2):view(overlap:size(1))
     local gtPixelCount = gtSegm:sum(3):sum(2):view(gtSegm:size(1))
     local correctSegmRatios = torch.cdiv(overlapPixelCount, gtPixelCount)
     return correctSegmRatios:mean()

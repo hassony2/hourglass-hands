@@ -32,14 +32,18 @@ end
 -- Global reference (may be updated in the task file below)
 if not ref then
     ref = {}
-    ref.nOutChannels = dataset.nJoints
     local nInChannels = 3
     if opt.useDepth then
         nInChannels = 3
     else
     end
-    ref.inputDim = {nInChannels, opt.inputRes, opt.inputRes}
+    if opt.outputSegm then
+        ref.nOutChannels = 1
+    else
+        ref.nOutChannels = dataset.nJoints
+    end
     ref.outputDim = {ref.nOutChannels, opt.outputRes, opt.outputRes}
+    ref.inputDim = {nInChannels, opt.inputRes, opt.inputRes}
 end
 
 -- Load up task specific variables / functions
