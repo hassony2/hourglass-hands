@@ -48,6 +48,31 @@ function distAccuracy(dists, thr)
     end
 end
 
+function segmAccuracy(output, label, thr)
+    -- computes for each batch sample the proportion of the ground truth (gt)
+    -- segmentation that was correctly predicted by the network
+    local thr = thr or 0.5
+
+    -- extract one of the intermediate predictions
+    local gtSegm = label[1]
+    local predSegm = output[1]
+
+    -- extract segmentation map through thresholding
+    local predSegm = torch.ge(predSegm, thr)
+    predSegm = predSegm:float()
+
+    local gtSegm = torch.ge(gtSegm, thr)
+    gtSegm = gtSegm:float()
+    -- find overlapping pixels
+    local overlap = torch.cmul(predSegm, gtSegm)
+
+    -- compute proportion of pixels that are overlapping
+    local overlapPixelCount = overlap:sum(3):sum(2):view(overlap:size(1))
+    local gtPixelCount = gtSegm:sum(3):sum(2):view(gtSegm:size(1))
+    local correctSegmRatios = torch.cdiv(overlapPixelCount, gtPixelCount)
+    return correctSegmRatios:mean()
+end
+
 function heatmapAccuracy(output, label, thr, idxs)
     -- Calculate accuracy according to PCK, but uses ground truth heatmap rather than x,y locations
     -- First value to be returned is average accuracy across 'idxs', followed by individual accuracies

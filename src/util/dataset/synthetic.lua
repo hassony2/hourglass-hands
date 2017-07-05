@@ -86,11 +86,11 @@ function Dataset:loadImage(idx)
 end
 
 function Dataset:loadSegm(idx, loadType)
-    local loadType = loadType or cv.IMREAD_GRAYSCALE
+    local loadType = loadType or cv.IMREAD_COLOR
     local prefix = self.prefixes[idx]
     print(prefix)
     local path = paths.concat(self.segmFolder, prefix .. '.exr')
-    local segmImg = cv.imread{self:getPath(idx), loadType}
+    local segmImg = cv.imread{path, loadType}
     segmImg = segmImg:select(3, 1)
     segmImg = segmImg:clamp(0, 1) -- CAREFULL, this implies only one mesh can be segmented !
     return segmImg

@@ -84,7 +84,9 @@ end
 
 function crop(img, center, scale, rot, res)
     local ndim = img:nDimension()
-    if ndim == 2 then img = img:view(1,img:size(1),img:size(2)) end
+    if ndim == 2 then
+        img = torch.reshape(img, 1, img:size(1), img:size(2))
+    end
     local ht,wd = img:size(2), img:size(3)
     local tmpImg,newImg = img, torch.zeros(img:size(1), res, res)
 
