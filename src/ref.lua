@@ -35,7 +35,7 @@ if not ref then
     ref.nOutChannels = dataset.nJoints
     local nInChannels = 3
     if opt.useDepth then
-        nInChannels = 1
+        nInChannels = 3
     else
     end
     ref.inputDim = {nInChannels, opt.inputRes, opt.inputRes}
