@@ -46,7 +46,7 @@ function DataLoader:__init(opt, dataset, ref, split)
 
     local threads, sizes = Threads(opt.nThreads, preinit, init, main)
     self.threads = threads
-    if opt['finalPredictions'] == true then
+    if opt['finalPredictions'] == true and split == 'test' then
         self.batchsize = 1
         self.iters = dataset:size(split)
     else
