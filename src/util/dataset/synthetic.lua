@@ -17,6 +17,7 @@ function Dataset:__init()
         files = datasethelper.filesInDir(self.rgbFolder)
     end
     self.annotFolder = paths.concat(opt.dataDir, '2Dcoord')
+    self.segmFolder = paths.concat(opt.dataDir, 'segm')
     self.prefixes = {}
     for i, file in ipairs(files) do
         local prefix = string.split(file, "%.")[1]
@@ -82,6 +83,17 @@ function Dataset:loadImage(idx)
     else
         return image.load(self:getPath(idx))
     end
+end
+
+function Dataset:loadSegm(idx, loadType)
+    local loadType = loadType or cv.IMREAD_GRAYSCALE
+    local prefix = self.prefixes[idx]
+    print(prefix)
+    local path = paths.concat(self.segmFolder, prefix .. '.exr')
+    local segmImg = cv.imread{self:getPath(idx), loadType}
+    segmImg = segmImg:select(3, 1)
+    segmImg = segmImg:clamp(0, 1) -- CAREFULL, this implies only one mesh can be segmented !
+    return segmImg
 end
 
 function Dataset:getPartInfo(idx, verbose)

@@ -35,7 +35,6 @@ function createModel()
     local inp = nn.Identity()()
 
     -- Initial processing of the image
-    print(opt.useDepth)
     -- local cnv1_ = nil
     -- if opt.useDepth then
     --    cnv1_ = nnlib.SpatialConvolution(1,64,7,7,2,2,3,3)(inp)           -- 128
