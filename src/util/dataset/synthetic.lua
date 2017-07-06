@@ -34,9 +34,9 @@ function Dataset:__init()
                         {13,14,4}, {14, 15, 4}, {15, 16, 4},
                         {17, 18, 5}, {18, 19, 5}, {19, 20, 5}}
     -- percentage of test samples
-	self.testFrac = 0.2
+	self.testFrac = 0.05
     -- percentage of validation samples among remaining samples
-	self.valFrac = 0.2
+	self.valFrac = 0.05
 
     -- number of frames in each video
 	--- modulo for index mapping from and to folder
