@@ -98,6 +98,11 @@ function Dataset:loadImage(idx)
     end
 end
 
+function Dataset:loadSegm(idx)
+    -- returns proxy segmentation to avoid error during predictions
+    return torch.ones(540, 960)
+end
+
 function Dataset:getPartInfo(idx, verbose)
 	-- retrieve joint localizations
 	verbose = verbose or false

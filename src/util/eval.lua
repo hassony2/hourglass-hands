@@ -48,10 +48,13 @@ function distAccuracy(dists, thr)
     end
 end
 
-function segmAccuracy(output, label, thr)
-    -- computes for each batch sample the proportion of the ground truth (gt)
+function segmAccuracy(output, label, thr, iou)
+    -- computes for each batch sample an accuracy score
     -- segmentation that was correctly predicted by the network
+    -- :param iou: whether to use intersection over union or intersection over groundtruth 
     local thr = thr or 0.5
+    local iou = iou or true
+
 
     -- extract one of the intermediate predictions
     local gtSegm = label[1]
@@ -63,13 +66,19 @@ function segmAccuracy(output, label, thr)
 
     local gtSegm = torch.ge(gtSegm, thr)
     gtSegm = gtSegm:float()
+    
+    local unionSegm = torch.add(gtSegm, predSegm):clamp(0, 1)
     -- find overlapping pixels
-    local overlap = torch.cmul(predSegm, gtSegm)
+    local intersect = torch.cmul(predSegm, gtSegm)
 
-    -- compute proportion of pixels that are overlapping
-    local overlapPixelCount = overlap:sum(4):sum(3):sum(2):view(overlap:size(1))
-    local gtPixelCount = gtSegm:sum(3):sum(2):view(gtSegm:size(1))
-    local correctSegmRatios = torch.cdiv(overlapPixelCount, gtPixelCount)
+    local intersectPixelCount = intersect:sum(4):sum(3):sum(2):view(intersect:size(1))
+    local gtPixelCount = nil
+    if iou then
+        gtPixelCount = unionSegm:sum(3):sum(2):view(unionSegm:size(1))
+    else
+        gtPixelCount = gtSegm:sum(3):sum(2):view(gtSegm:size(1))
+    end
+    local correctSegmRatios = torch.cdiv(intersectPixelCount, gtPixelCount)
     return correctSegmRatios:mean()
 end
 

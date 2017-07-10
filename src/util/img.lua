@@ -299,6 +299,23 @@ function heatmapVisualization(set, idx, pred, inp, gt)
     return hmImg, inp
 end
 
+function segmSuperpose(inp, hm, finalScale, dimingFactor)
+    -- inp is an tensor image in the format (3, width, height)
+    -- hm the corresponding segmentation heatmap in format (w, h)
+    -- finalScale is the final dimension of the superposed image in pixels
+    -- dimingFactor determines how much to darken the initial image
+    -- 0 for completely black, 1 for full brightness
+    local dimingFactor = dimingFactor or 0.4
+    local finalScale = finalScale or 200
+    local res = hm:size(2)
+    local scaleInp = image.scale(inp, finalScale)
+    -- copy darkened image to superposition 
+    local superpose = scaleInp:clone():mul(dimingFactor)
+    -- copy segmentation to red channel
+	local hmScale = image.scale(hm, finalScale)
+    superpose:sub(1, 1):add(hmScale:mul(1 - dimingFactor))
+    return superpose
+end
 -------------------------------------------------------------------------------
 -- Flipping functions
 -------------------------------------------------------------------------------
