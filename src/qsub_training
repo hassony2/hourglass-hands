@@ -1,0 +1,16 @@
+#!/bin/bash
+#$ -o logs/output_training.dat
+#$ -e logs/error_training.dat
+#$ -l mem_req=8000M
+#$ -l h_vmem=300G
+#$ -N hourglassHands
+#$ -q titan.q
+# export PATH=/sequoia/data1/yhasson/miniconda3/bin:/sequoia/data1/yhasson/torch/install/bin:/cm/shared/apps/sge/2011.11p1/bin/linux-x64:/cm/shared/apps/gcc/4.8.1/bin:/usr/lib64/qt-3.3/bin:/tmp/4772529.1.gpu.q:/usr/local/bin:/bin:/usr/bin:/opt/dell/srvadmin/bin:/home/yhasson/bin:$PATH
+# export LD_LIBRARY_PATH="/sequoia/data1/yhasson/cuda/lib64/:$LD_LIBRARY_PATH"
+# export LD_LIBRARY_PATH="/home/yhasson/perso_lib/lib:$LD_LIBRARY_PATH"
+
+# Activate torch environment
+cd /sequoia/data1/yhasson/torch/.wigwam
+source wigwam_activate.sh
+cd /sequoia/data1/yhasson/hourglass-hands/src/
+sh launch_training.sh

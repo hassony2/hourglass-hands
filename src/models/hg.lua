@@ -35,6 +35,12 @@ function createModel()
     local inp = nn.Identity()()
 
     -- Initial processing of the image
+    -- local cnv1_ = nil
+    -- if opt.useDepth then
+    --    cnv1_ = nnlib.SpatialConvolution(1,64,7,7,2,2,3,3)(inp)           -- 128
+    -- else
+    --    cnv1_ = nnlib.SpatialConvolution(3,64,7,7,2,2,3,3)(inp)           -- 128
+    -- end
     local cnv1_ = nnlib.SpatialConvolution(3,64,7,7,2,2,3,3)(inp)           -- 128
     local cnv1 = nnlib.ReLU(true)(nn.SpatialBatchNormalization(64)(cnv1_))
     local r1 = Residual(64,128)(cnv1)

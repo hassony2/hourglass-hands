@@ -1,6 +1,7 @@
 if not opt then
 
-projectDir = projectDir or paths.concat(os.getenv('HOME'),'pose-hg-train')
+projectDir = projectDir or paths.concat(os.getenv('HOME'),'pose-hg-train')  
+datasetName = datasetName or nil --allows to pass dataset option in itorch script
 
 local function parse(arg)
     local cmd = torch.CmdLine()
@@ -8,12 +9,13 @@ local function parse(arg)
     cmd:text(' ---------- General options ------------------------------------')
     cmd:text()
     cmd:option('-expID',       'default', 'Experiment ID')
-    cmd:option('-dataset',        'tzionas', 'Dataset choice: mpii | flic')
-    cmd:option('-dataDir',  '/home/local/yhasson/datasets/tzionas/', 'Data directory')
+    cmd:option('-dataset',        'synthetic', 'Dataset choice: mpii | flic | synthetic | uciego')
+    cmd:option('-dataDir',  projectDir .. '/data/synthetic', 'Data directory')
     cmd:option('-expDir',   projectDir .. '/exp',  'Experiments directory')
     cmd:option('-manualSeed',         -1, 'Manually set RNG seed')
     cmd:option('-GPU',                 1, 'Default preferred GPU, if set to -1: no GPU')
-    cmd:option('-finalPredictions',false, 'Generate a final set of predictions at the end of training (default no)')
+    cmd:option('-finalPredictions',false, 'Generate a final set of predictions (should be used with -nEpochs 0)')
+    cmd:option('-predictSet',     'test', 'Set on which final predictions are made')
     cmd:option('-nThreads',            4, 'Number of data loading threads')
     cmd:text()
     cmd:text(' ---------- Model options --------------------------------------')
@@ -48,7 +50,7 @@ local function parse(arg)
     cmd:text(' ---------- Training options -----------------------------------')
     cmd:text()
     cmd:option('-nEpochs',           100, 'Total number of epochs to run')
-    cmd:option('-trainIters',         50, 'Number of train iterations per epoch')
+    cmd:option('-trainIters',         1000, 'Number of train iterations per epoch')
     cmd:option('-trainBatch',          6, 'Mini-batch size')
     cmd:option('-validIters',         10, 'Number of validation iterations per epoch')
     cmd:option('-validBatch',          1, 'Mini-batch size for validation')
@@ -57,6 +59,7 @@ local function parse(arg)
     cmd:text()
     cmd:text(' ---------- Data options ---------------------------------------')
     cmd:text()
+    cmd:option('-useDepth',        false, 'True if use depth')
     cmd:option('-inputRes',          256, 'Input image resolution')
     cmd:option('-outputRes',          64, 'Output heatmap resolution')
     cmd:option('-scale',             .25, 'Degree of scale augmentation')
@@ -64,6 +67,14 @@ local function parse(arg)
     cmd:option('-hmGauss',             1, 'Heatmap gaussian size')
 
     local opt = cmd:parse(arg or {})
+    -- use global dataset if present
+    if useDepth then
+        opt.useDepth = useDepth
+    end
+    if datasetName then
+        opt.dataset = datasetName
+        opt.dataDir = paths.concat(projectDir, 'data/'.. opt.dataset)
+    end
     opt.expDir = paths.concat(opt.expDir, opt.dataset)
     opt.save = paths.concat(opt.expDir, opt.expID)
     return opt

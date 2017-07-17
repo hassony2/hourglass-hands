@@ -27,19 +27,22 @@ function generateSample(set, idx)
     local out = torch.zeros(dataset.nJoints, opt.outputRes, opt.outputRes)
     for i = 1,dataset.nJoints do
         if pts[i][1] > 1 then -- Checks that there is a ground truth annotation
-            drawGaussian(out[i], transform(pts[i], c, s, r, opt.outputRes), opt.hmGauss)
+            if opt.predictSegm then
+            else
+                drawGaussian(out[i], transform(pts[i], c, s, r, opt.outputRes), opt.hmGauss)
+            end
         end
     end
 
     if set == 'train' then
         -- Flipping and color augmentation
-        if torch.uniform() < .5 then
-            inp = flip(inp)
-            out = shuffleLR(flip(out))
-        end
-        inp[1]:mul(torch.uniform(0.6,1.4)):clamp(0,1)
-        inp[2]:mul(torch.uniform(0.6,1.4)):clamp(0,1)
-        inp[3]:mul(torch.uniform(0.6,1.4)):clamp(0,1)
+        -- if torch.uniform() < .5 then
+        --    inp = flip(inp)
+        --    out = shuffleLR(flip(out))
+        -- end
+        -- inp[1]:mul(torch.uniform(0.6,1.4)):clamp(0,1)
+        -- inp[2]:mul(torch.uniform(0.6,1.4)):clamp(0,1)
+        -- inp[3]:mul(torch.uniform(0.6,1.4)):clamp(0,1)
     end
 
     return inp,out
